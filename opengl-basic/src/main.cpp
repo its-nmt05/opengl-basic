@@ -166,7 +166,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        GLCall(glDrawElements(GL_TRIANGLES, vertexCount, GL_INT, nullptr));
+        GLCall(glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, nullptr));
 
         glfwSwapBuffers(window);    // swap back and front buffer
         glfwPollEvents();   // poll for IO events
