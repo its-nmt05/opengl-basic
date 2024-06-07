@@ -1,5 +1,7 @@
 #include <glad/glad.h>
 #include <glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -10,6 +12,8 @@ using namespace std;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+unsigned int drawCube();
+unsigned int drawTriangle();
 
 struct ShaderProgramSource
 {
@@ -123,28 +127,12 @@ int main() {
         return -1;
     }
 
-    // preparation for drawing traingle
-    float vertices[] = {
-        -0.5f, -0.5f,
-        0.0f, 0.5f,
-        0.5f, -0.5f
-    };
-
-    unsigned int buffer, vertexArr;
-
-    glGenBuffers(1, &buffer);
-    glGenVertexArrays(1, &vertexArr);
-
-    glBindVertexArray(vertexArr);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-    glEnableVertexAttribArray(0);
+    unsigned int vertexCount = drawCube();
 
     ShaderProgramSource source = parseShader("opengl-basic/res/shaders/basic.shader");
-     unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
+    unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -156,8 +144,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // draw triangle
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
         glfwSwapBuffers(window);    // swap back and front buffer
         glfwPollEvents();   // poll for IO events
@@ -179,4 +166,88 @@ void processInput(GLFWwindow* window)
     {
         glfwSetWindowShouldClose(window, true);
     }
+}
+
+unsigned int drawTriangle() 
+{
+    float vertices[] = {
+        -0.5f, -0.5f,
+        0.0f, 0.5f,
+        0.5f, -0.5f
+    };
+    
+    unsigned int buffer, vertexArr;
+    
+    glGenBuffers(1, &buffer);
+    glGenVertexArrays(1, &vertexArr);
+    
+    glBindVertexArray(vertexArr);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    glEnableVertexAttribArray(0);
+
+    return 6;
+}
+
+unsigned int drawCube()
+{
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+        -0.5f,  0.5f, -0.5f,  
+        -0.5f, -0.5f, -0.5f,  
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        
+         0.5f,  0.5f,  0.5f, 
+         0.5f,  0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f,  0.5f, 
+         0.5f,  0.5f,  0.5f, 
+
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f,  0.5f, 
+         0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f,  0.5f, -0.5f, 
+         0.5f,  0.5f, -0.5f, 
+         0.5f,  0.5f,  0.5f, 
+         0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f,
+    };
+
+    unsigned int buffer, vertexArr;
+
+    glGenBuffers(1, &buffer);
+    glGenVertexArrays(1, &vertexArr);
+
+    glBindVertexArray(vertexArr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+
+    return 36;
 }
