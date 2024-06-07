@@ -8,6 +8,11 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCall(x) glClearError();\
+    x;\
+    ASSERT(glLogCall(#x, __FILE__, __LINE__))
+
 using namespace std;
 using namespace glm;
 
@@ -16,6 +21,22 @@ void processInput(GLFWwindow* window);
 unsigned int drawCube();
 unsigned int drawTriangle();
 unsigned int drawSquare();
+
+static void glClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool glLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        cout << "[OpenGL ERROR] (" << error << "): " << function <<
+           " " << file << ": " << line << endl;
+        return false;
+    }
+    return true;
+}
 
 struct ShaderProgramSource
 {
@@ -145,7 +166,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, vertexCount, GL_INT, nullptr));
 
         glfwSwapBuffers(window);    // swap back and front buffer
         glfwPollEvents();   // poll for IO events
