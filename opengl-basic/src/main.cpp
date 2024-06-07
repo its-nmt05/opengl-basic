@@ -9,11 +9,13 @@
 #include <sstream>
 
 using namespace std;
+using namespace glm;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 unsigned int drawCube();
 unsigned int drawTriangle();
+unsigned int drawSquare();
 
 struct ShaderProgramSource
 {
@@ -127,12 +129,11 @@ int main() {
         return -1;
     }
 
-    unsigned int vertexCount = drawCube();
+    unsigned int vertexCount = drawSquare();
 
     ShaderProgramSource source = parseShader("opengl-basic/res/shaders/basic.shader");
     unsigned int shader = createShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -144,7 +145,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window);    // swap back and front buffer
         glfwPollEvents();   // poll for IO events
@@ -171,11 +172,12 @@ void processInput(GLFWwindow* window)
 unsigned int drawTriangle() 
 {
     float vertices[] = {
-        -0.5f, -0.5f,
-        0.0f, 0.5f,
-        0.5f, -0.5f
+        -0.5f, -0.5f, // 0
+         0.5f, -0.5f, // 1
+         0.5f, 0.5f   // 2
     };
-    
+
+ 
     unsigned int buffer, vertexArr;
     
     glGenBuffers(1, &buffer);
@@ -188,9 +190,46 @@ unsigned int drawTriangle()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
     glEnableVertexAttribArray(0);
 
+    return 3;
+}
+
+unsigned int drawSquare()
+{
+    float vertices[] = {
+        -0.5f, -0.5f, //0
+         0.5f, -0.5f, //1
+         0.5f, 0.5f,  //2
+        -0.5f, 0.5f   //3
+    };
+
+    // using index buffer
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    unsigned int buffer, vertexArr;
+        
+    glGenBuffers(1, &buffer);
+    glGenVertexArrays(1, &vertexArr);
+
+    glBindVertexArray(vertexArr);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    glEnableVertexAttribArray(0);
+
+    unsigned int ibo;
+
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     return 6;
 }
 
+// we're not using index buffers here
 unsigned int drawCube()
 {
     float vertices[] = {
